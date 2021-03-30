@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: SOLID Documentation
+  description: This is an API for training the concepts of SOLID.
+  version: 0.0.1
+  contact:
+    email: julio.novais@outlook.com
+
+paths:
+  /users:
+    post:
+      tags:
+        - 'Users'
+      summary: Create a user
+      description: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+              example:
+                name: User name example
+                email: User email example
+      responses:
+        201:
+          description: Created
+        400:
+          description: User email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - 'Users'
+      summary: List all users
+      description: List all users created
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        400:
+          description: Bad Request errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Unauthorized:
+                  summary: User is not an admin
+                  value:
+                    error: User does not have permission
+                NotFound:
+                  summary: User wasn't found
+                  value:
+                    error: User not found
+  /users/{user_id}:
+    get:
+      tags:
+        - 'Users'
+      summary: List a specific user
+      description: Get a specific user by its ID
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The user ID
+      responses:
+        200:
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /users/{user_id}/admin:
+    patch:
+      tags:
+        - 'Users'
+      summary: Turn user in admin
+      description: Turn a specific user in admin by it's ID
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The user ID
+      responses:
+        200:
+          description: A user who was turned admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  responses:
+    NotFound:
+      description: User was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          example:
+            error: User not found
+
+  schemas:
+    Error:
+      properties:
+        error:
+          type: string
+
+    User:
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        admin:
+          type: boolean
+        email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
